@@ -1,0 +1,44 @@
+{
+	"name": "B100BC",
+	"version": "0.0.3",
+	"keywords": "B100, IoT Module",
+	"description": "B100BC IoT Module Hardware Definition and Utility Functions Library.",
+	"authors":
+	{
+		"name": "Mehmet Gunce Akkoyun",
+		"email": "akkoyun@me.com",
+		"url": "https://github.com/akkoyun"
+	},
+	"license": "MIT",
+	"frameworks": "arduino",
+	"headers": "B100BC.h",
+	"platforms":
+	[
+		"atmelavr",
+		"atmelmegaavr"
+	],
+	"repository":
+	{
+		"type": "git",
+		"url": "https://github.com/akkoyun/B100BC_Hardware"
+	},
+	"dependencies":
+	[
+		{
+			"owner": "akkoyun",
+			"name": "Console",
+			"version": "^1.0.0"
+		}
+	],
+	"examples": [
+		{
+			"name": "B100BC Diagnostic",
+			"base": "examples/Diagnostic",
+			"files": [
+				"Diagnostic.ino"
+			]
+		}
+	]
+}
+
+
