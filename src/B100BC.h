@@ -10,24 +10,37 @@
 		#include <Arduino.h>
 	#endif
 
-	// Include Libraries
+	// Include Definitions
+	#ifndef __B100BC_Definitions__
+		#include "Definitions.h"
+	#endif
+
+	// Include Sound Library
 	#ifndef __Sounds__
 		#include "Sounds.h"
 	#endif
 
-	// Define LED Colors
-	#define	__WHITE__		(uint8_t) 0
-	#define	__RED__			(uint8_t) 1
-	#define	__GREEN__		(uint8_t) 2
-	#define	__BLUE__		(uint8_t) 3
-	#define	__PURPLE__		(uint8_t) 4
+	// Define RTC Library
+	#ifndef __RV3028__
+		#include <RV3028.h>
+	#endif
 
-	// Define Relay States
-	#define	__START__		(uint8_t) 1
-	#define	__STOP__		(uint8_t) 2
-	#define	__ALARM__		(uint8_t) 3
-	#define	__STOP_LOCK__	(uint8_t) 4
-	#define	__STOP_UNLOCK__	(uint8_t) 5
+	// Define Statistical Library
+	#ifndef __Statistical__
+		#include <Statistical.h>
+	#endif
+
+	// Define Environment Library
+	#ifndef __Environment__
+		#include <Environment.h>
+	#endif
+#include <Console.h>
+
+	// Define Console Library
+	Console B100_Terminal(Serial);
+
+	// Stream library object definition.
+	Stream_Stats<float> Pressure_Stats;
 
 	// B100BC Functions
 	class B100BC {
@@ -187,108 +200,6 @@
 
 			}
 
-			// FOTA Functions
-			void FOTA_Power(const bool _State) {
-
-				// Turn FOTA Power Enable HIGH
-				if (_State) PORTG |= 0b00000001;
-
-				// Turn FOTA Power Enable LOW
-				if (!_State) PORTG &= 0b11111110;
-
-			}
-
-			// Buzzer Functions
-			inline void Sound_Level(void) {
-
-				// Set Buzzer Sound Level to High
-				PORTE &= 0b11100111;
-				PORTE |= 0b00011000;
-
-			}
-			void Bend_Tones(float initFrequency, float finalFrequency, float prop, long noteDuration, int silentDuration) {
-
-				if(silentDuration==0) silentDuration=1;
-
-				if(initFrequency < finalFrequency) {
-
-					for (size_t i = initFrequency; i < finalFrequency; i = i * prop) this->Tone(i, noteDuration, silentDuration);
-
-				} else {
-
-					for (size_t i = initFrequency; i > finalFrequency; i = i / prop) this->Tone(i, noteDuration, silentDuration);
-
-				}
-
-			}
-			void Tone(float noteFrequency, long noteDuration, int silentDuration) {
-
-				if (silentDuration == 0) silentDuration = 1;
-
-				// Play Tone
-				tone(3, noteFrequency, noteDuration);
-
-				// Delay Note
-				delay(noteDuration);
-
-				// Delay Silent
-				delay(silentDuration);
-
-			}
-
-		// Public Functions
-		public:
-
-			// Module DataSet Definitions
-			struct B100BC_Struct {
-
-				// AVR Timer Variable
-				uint32_t Timer_Counter = 0;
-
-				// PowerStat Input Variables
-				struct Struct_Sense {
-					bool SD_Card = false;
-					bool Pressure_Sensor_1 = false;
-					bool Pressure_Sensor_2 = false;
-				} Sense;
-
-			} Variables;
-
-			// Construct a new Hardware object
-			B100BC(void) {
-
-				// Set Module Pinout
-				this->Set_Pinout();
-
-				// Set Buzzer Sound Level
-				this->Sound_Level();
-
-				// Control Pressure Sensor
-				this->Variables.Sense.Pressure_Sensor_1 = bitRead(PINF, 0);
-				this->Variables.Sense.Pressure_Sensor_2 = bitRead(PINF, 3);
-
-				// Control SD Card
-				this->Variables.Sense.SD_Card = bitRead(PINC, 1);
-				
-			}
-
-			// Hardware boot function
-			void Begin(void) {
-
-				// Boot Delay
-				delay(50);
-
-				// Play Sound
-				this->Buzzer(Boot);
-
-				// Turn FOTA Power Off
-				this->FOTA_Power(false);
-
-				// Timer Interrupt Definitions
-				this->AVR_Timer_1sn();
-
-			}
-
 			// AVR Interrupt
 			void AVR_Pin_Interrupt(const uint8_t _Interrupt_Type, const bool _State) {
 
@@ -354,6 +265,275 @@
 					}
 
 				}
+
+			}
+
+			// FOTA Functions
+			void FOTA_Power(const bool _State) {
+
+				// Turn FOTA Power Enable HIGH
+				if (_State) PORTG |= 0b00000001;
+
+				// Turn FOTA Power Enable LOW
+				if (!_State) PORTG &= 0b11111110;
+
+			}
+
+			// Buzzer Functions
+			inline void Sound_Level(void) {
+
+				// Set Buzzer Sound Level to High
+				PORTE &= 0b11100111;
+				PORTE |= 0b00011000;
+
+			}
+			void Bend_Tones(float initFrequency, float finalFrequency, float prop, long noteDuration, int silentDuration) {
+
+				if(silentDuration==0) silentDuration=1;
+
+				if(initFrequency < finalFrequency) {
+
+					for (size_t i = initFrequency; i < finalFrequency; i = i * prop) this->Tone(i, noteDuration, silentDuration);
+
+				} else {
+
+					for (size_t i = initFrequency; i > finalFrequency; i = i / prop) this->Tone(i, noteDuration, silentDuration);
+
+				}
+
+			}
+			void Tone(float noteFrequency, long noteDuration, int silentDuration) {
+
+				if (silentDuration == 0) silentDuration = 1;
+
+				// Play Tone
+				tone(3, noteFrequency, noteDuration);
+
+				// Delay Note
+				delay(noteDuration);
+
+				// Delay Silent
+				delay(silentDuration);
+
+			}
+
+			// Terminal Functions
+			void Terminal_PowerStat(void) {
+
+				// Start Console
+				this->Terminal_Start();
+
+				// Draw Main Box
+				this->Terminal_Box(1, 1, 41, 120, "", 0, true,true);
+
+				// Draw Hardware Diagnostic Box
+				this->Terminal_Box(4, 2, 12, 39, "Hardware Diagnostic", 1, false, false);
+
+				// Draw Device Detail Box
+				this->Terminal_Box(4, 40, 12, 79, "Device Detail", 2, false, false);
+
+				// Draw Battery Detail Box
+				this->Terminal_Box(4, 80, 12, 119, "Battery", 3, false, false);
+
+				// Draw GSM Terminal Box
+				this->Terminal_Box(13, 2, 15, 79, "", 0, false, false);
+
+				// Draw Interval Box
+				this->Terminal_Box(13, 80, 15, 119, "", 0, false, false);
+
+				// Draw GSM Detail Box
+				this->Terminal_Box(16, 2, 23, 39, "GSM Detail", 4, false, false);
+
+				// Draw GSM Connection Box
+				this->Terminal_Box(16, 40, 23, 79, "GSM Connection", 5, false, false);
+
+				// Draw FOTA Detail Box
+				this->Terminal_Box(16, 80, 23, 119, "FOTA", 6, false, false);
+
+				// Draw JSON Box
+				this->Terminal_Box(24, 2, 32, 79, "JSON", 0, false, false);
+
+				// Draw Pressure Box
+				this->Terminal_Box(24, 80, 32, 119, "Pressure", 7, false, false);
+
+				// Draw GSM Detail Box
+				this->Terminal_Box(16, 2, 23, 39, "GSM Detail", 4, false, false);
+
+				// Draw Voltage Box
+				this->Terminal_Box(33, 2, 38, 39, "Voltage", 0, false, false);
+
+				// Draw Current Box
+				this->Terminal_Box(33, 40, 38, 79, "Current", 0, false, false);
+
+				// Draw Power Box
+				this->Terminal_Box(33, 80, 38, 119, "Power", 0, false, false);
+
+			}
+
+			// Begin Serial VT100 Console.
+			void Terminal_Start(void) {
+
+				// Start Terminal
+				Serial.begin(115200);
+
+				// Cursor Off
+				Serial.print(F("\e[?25l"));
+
+				// Clear Screen
+				Serial.print(F("\e[2J"));
+
+				// Reset Delay
+				delay(5);
+
+			}
+
+			// Draw Box Function.
+			void Terminal_Box(uint8_t _X1, uint8_t _Y1, uint8_t _X2, uint8_t _Y2, String _Text, uint8_t _Number, bool _Header, bool _Footer) {
+
+				// Set Text Color (White)
+				Serial.print(F("\e[37m"));
+
+				// Set Text Format
+				Serial.print(F("\e[2m"));
+
+				// Print Corners
+				Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("┌"));
+				Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("└"));
+				Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┐"));
+				Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┘"));
+
+				// Print Lines
+				for (uint8_t i = _X1 + 1; i <= _X2 - 1; i++) {
+					Serial.print(F("\e[")); Serial.print(i); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("│"));
+					Serial.print(F("\e[")); Serial.print(i); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("│"));
+				}
+				for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
+					Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
+					Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
+				}
+
+				// Print Header
+				Serial.print(F("\e[33m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y1 + 2); Serial.print(F("H")); Serial.print(_Text);
+
+				// Print Header Number
+				if (_Number != 0) {
+					Serial.print(F("\e[37m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2 - 4); Serial.print(F("H")); Serial.print(F("[ ]"));
+					Serial.print(F("\e[33m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2 - 3); Serial.print(F("H")); Serial.print(_Number);
+				}
+
+				// Set Text Color (White)
+				Serial.print(F("\e[37m"));
+
+				// Draw Header
+				if (_Header) {
+
+					// Print Corners
+					Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("├"));
+					Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┤"));
+
+					// Print Lines
+					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
+						Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
+					}
+
+				}
+				
+				// Draw Footer			
+				if (_Footer) {
+
+					// Print Corners
+					Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("├"));
+					Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┤"));
+
+					// Print Lines
+					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
+						Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
+					}
+
+				}
+				
+			}
+
+
+		// Public Functions
+		public:
+
+			// Module DataSet Definitions
+			struct B100BC_Struct {
+
+				// AVR Timer Variable
+				uint32_t Timer_Counter = 0;
+
+				// PowerStat Input Variables
+				struct Struct_Sense {
+					bool SD_Card = false;
+					bool Pressure_Sensor_1 = false;
+					bool Pressure_Sensor_2 = false;
+				} Sense;
+
+				// Data Send Interval Variables
+				struct Struct_Interval {
+					uint32_t Online;
+					uint32_t Offline;
+					uint32_t Alarm;
+				} Interval;
+
+				// Pressure Variables
+				struct Struct_Pressure {
+					uint16_t Data_Count;
+					float Value;
+					float Min;
+					float Max;
+					float Average;
+					float Median;
+					float Deviation;
+				} Pressure;
+
+			} Variables;
+
+			// Construct a new Hardware object
+			B100BC(void) {
+
+				// Set Module Pinout
+				this->Set_Pinout();
+
+				// Set Buzzer Sound Level
+				this->Sound_Level();
+
+				// Control Pressure Sensor
+				this->Variables.Sense.Pressure_Sensor_1 = bitRead(PINF, 0);
+				this->Variables.Sense.Pressure_Sensor_2 = bitRead(PINF, 3);
+
+				// Control SD Card
+				this->Variables.Sense.SD_Card = bitRead(PINC, 1);
+				
+			}
+
+			// Hardware boot function
+			void Begin(void) {
+
+				// Boot Delay
+				delay(50);
+
+				// Play Sound
+				this->Buzzer(Boot);
+
+				// Turn FOTA Power Off
+				this->FOTA_Power(false);
+
+				// Timer Interrupt Definitions
+				this->AVR_Timer_1sn();
+
+				// Start GSM Serial
+				Serial3.begin(115200);
+
+				// Start Console
+				this->Terminal_PowerStat();
+
+				// Get Interval Constants
+				this->Variables.Interval.Online = this->Get_EEPROM(EEPROM_Online_Interval);
+				this->Variables.Interval.Offline = this->Get_EEPROM(EEPROM_Offline_Interval);
+				this->Variables.Interval.Alarm = this->Get_EEPROM(EEPROM_Alarm_Duration);
 
 			}
 
@@ -882,6 +1062,57 @@
 					}
 
 				}
+
+			}
+
+			// Read EEPROM Function
+			uint16_t Get_EEPROM(uint8_t _Address) {
+
+				// RTC Object Definitions	
+				I2C_Functions I2C_RTC(__I2C_Addr_RV3028C7__, true, 1);
+				RV3028 RTC(true, 1);
+
+				// Read Registers
+				uint8_t _High_Byte = (RTC.Read_EEPROM(_Address));
+				uint8_t _Low_Byte = (RTC.Read_EEPROM(_Address + 0x01));
+
+				// Combine Bytes
+				uint16_t _Byte = (_High_Byte << 8) | _Low_Byte;
+
+				// End Function
+				return(_Byte);
+
+			}
+
+			// RTC Functions
+			void Set_Timer(uint16_t Interval) {
+
+				// RTC Object Definitions	
+				I2C_Functions I2C_RTC(__I2C_Addr_RV3028C7__, true, 1);
+				RV3028 RTC(true, 1);
+
+				// Set Timer
+				RTC.Set_Timer(false, 1, Interval, true, true, true);
+
+			}
+
+			// Measure Pressure
+			void Measure_Pressure(void) {
+
+				// Set Object
+				Analog _Pressure_Sensor(0x01, 50, true, 1.5777, -1.1925);
+
+				// Pressure Stats
+				Pressure_Stats.Add(_Pressure_Sensor.Read());
+
+				// Set Variables
+				this->Variables.Pressure.Data_Count = Pressure_Stats.Variable.Data_Count;
+				this->Variables.Pressure.Average = Pressure_Stats.Variable.Average;
+				this->Variables.Pressure.Min = Pressure_Stats.Variable.Min;
+				this->Variables.Pressure.Max = Pressure_Stats.Variable.Max;
+				this->Variables.Pressure.Value = Pressure_Stats.Variable.Last;
+				this->Variables.Pressure.Median = Pressure_Stats.Variable.Median;
+				this->Variables.Pressure.Deviation = Pressure_Stats.Variable.Deviation;
 
 			}
 

@@ -1,6 +1,6 @@
 {
 	"name": "B100BC",
-	"version": "0.0.3",
+	"version": "0.2.5",
 	"keywords": "B100, IoT Module",
 	"description": "B100BC IoT Module Hardware Definition and Utility Functions Library.",
 	"authors":
@@ -28,6 +28,26 @@
 			"owner": "akkoyun",
 			"name": "Console",
 			"version": "^1.0.0"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "I2C_Functions",
+			"version": "^1.6.2"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "RV3028",
+			"version": "^1.2.3"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "Statistical",
+			"version": "^2.0.5"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "Environment",
+			"version": "^5.0.0"
 		}
 	],
 	"examples": [
