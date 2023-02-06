@@ -318,46 +318,284 @@
 			}
 
 			// Terminal Functions
+
+
+
+			// Set Cursor Position Function.
+			void Terminal_Set_Cursor(const uint8_t _X, const uint8_t _Y) {
+
+				// Set Cursor Position
+				Serial.print(F("\e["));
+				Serial.print(_X);
+				Serial.print(F(";"));
+				Serial.print(_Y);
+				Serial.print(F("H"));
+
+			}
+
+			// Set Text Color Function.
+			void Terminal_Text_Color(const uint8_t _Color) {
+
+				// Set Text Color.
+				Serial.print(F("\e["));
+				Serial.print(_Color);
+				Serial.print('m');
+
+			}
+
+			// Set Back Ground Color Function.
+			void Terminal_Background_Color(const uint8_t _Color) {
+
+				// Set Back Ground Color.
+				Serial.print(F("\e["));
+				Serial.print(_Color + 10);
+				Serial.print('m');
+
+			}
+
+			// Set Text Format Function
+			void Terminal_Text_Format(const uint8_t _Format) {
+
+				// Set Text Format
+				Serial.print(F("\e["));
+				Serial.print(_Format);
+				Serial.write('m');
+
+			}
+
+			// Dot Print Function.
+			void Terminal_Dot(const uint8_t _X, const uint8_t _Y, const uint8_t _Count) {
+
+				// Set Text Color
+				this->Terminal_Text_Color(Terminal_GRAY);
+
+				// Set Cursor Position
+				this->Terminal_Set_Cursor(_X, _Y);
+
+				// Print Dot
+				for (uint8_t i = 0; i < _Count; i++) Serial.print(".");
+
+			}
+
+			// Bracket Place Holder Function.
+			void Terminal_Bracket(const uint8_t _X, const uint8_t _Y, const uint8_t _Space) {
+
+				// Set Text Color
+				this->Terminal_Text_Color(Terminal_WHITE);
+
+				// Set Cursor Position
+				this->Terminal_Set_Cursor(_X, _Y);
+
+				// Print Bracket Start
+				Serial.print("[");
+
+				// Set Cursor Position
+				this->Terminal_Set_Cursor(_X, _Y + _Space + 1);
+
+				// Print Bracket Start
+				Serial.print("]");
+
+			}
+
+			// Draw Box Function.
+			void Terminal_Box(const uint8_t _X1, const uint8_t _Y1, const uint8_t _X2, const uint8_t _Y2, const String _Text, const uint8_t _Number, const bool _Header, const bool _Footer) {
+
+				// Set Text Color (White)
+				this->Terminal_Text_Color(Terminal_WHITE);
+
+				// Set Text Format
+				this->Terminal_Text_Format(Terminal_DIM);
+
+				// Print Corners
+				this->Terminal_Set_Cursor(_X1, _Y1); Serial.print(F("┌"));
+				this->Terminal_Set_Cursor(_X2, _Y1); Serial.print(F("└"));
+				this->Terminal_Set_Cursor(_X1, _Y2); Serial.print(F("┐"));
+				this->Terminal_Set_Cursor(_X2, _Y2); Serial.print(F("┘"));
+
+				// Print Lines
+				for (uint8_t i = _X1 + 1; i <= _X2 - 1; i++) {this->Terminal_Set_Cursor(i, _Y1); Serial.print(F("│")); this->Terminal_Set_Cursor(i, _Y2); Serial.print(F("│"));}
+				for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {this->Terminal_Set_Cursor(_X1, i); Serial.print(F("─")); this->Terminal_Set_Cursor(_X2, i); Serial.print(F("─"));}
+
+				// Draw Header
+				if (_Header) {
+
+					// Print Corners
+					this->Terminal_Set_Cursor(_X1 + 2, _Y1); Serial.print(F("├"));
+					this->Terminal_Set_Cursor(_X1 + 2, _Y2); Serial.print(F("┤"));
+
+					// Print Lines
+					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {this->Terminal_Set_Cursor(_X1 + 2, i); Serial.print(F("─"));}
+
+				}
+				
+				// Draw Footer			
+				if (_Footer) {
+
+					// Print Corners
+					this->Terminal_Set_Cursor(_X2 - 2, _Y1); Serial.print(F("├"));
+					this->Terminal_Set_Cursor(_X2 - 2, _Y2); Serial.print(F("┤"));
+
+					// Print Lines
+					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {this->Terminal_Set_Cursor(_X2 - 2, i); Serial.print(F("─"));}
+
+				}
+
+				// Set Text Color (White)
+				this->Terminal_Text_Color(Terminal_YELLOW);
+
+				// Print Header
+				this->Terminal_Set_Cursor(_X1, _Y1 + 2); Serial.print(_Text);
+
+				// Print Header Number
+				if (_Number != 0) {this->Terminal_Bracket(_X1, _Y2 - 4, 1); this->Terminal_Set_Cursor(_X1, _Y2 - 3); this->Terminal_Text_Color(Terminal_GRAY); Serial.print(_Number);}
+
+				// Set Text Color (White)
+				this->Terminal_Text_Color(Terminal_WHITE);
+
+			}
+
+			// Hardware Diagnostic Box
+			void Terminal_Hardware_Diagnostic(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(4, 2, 12, 41, "Hardware Diagnostic", 1, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(5, 4); Serial.print(F("I2C Multiplexer (0x70)")); this->Terminal_Dot(5, 26, 8); this->Terminal_Bracket(5, 34, 4);
+				this->Terminal_Set_Cursor(6, 4); Serial.print(F("I2C RTC (0x52)")); this->Terminal_Dot(6, 18, 16); this->Terminal_Bracket(6, 34, 4);
+				this->Terminal_Set_Cursor(7, 4); Serial.print(F("I2C Serial ID (0x50)")); this->Terminal_Dot(7, 24, 10); this->Terminal_Bracket(7, 34, 4);
+				this->Terminal_Set_Cursor(8, 4); Serial.print(F("I2C Temperature (0x40)")); this->Terminal_Dot(8, 26, 8); this->Terminal_Bracket(8, 34, 4);
+				this->Terminal_Set_Cursor(9, 4); Serial.print(F("I2C Battery Gauge (0x36)")); this->Terminal_Dot(9, 28, 6); this->Terminal_Bracket(9, 34, 4);
+				this->Terminal_Set_Cursor(10, 4); Serial.print(F("I2C Battery Charger (0x6B)")); this->Terminal_Dot(10, 30, 4); this->Terminal_Bracket(10, 34, 4);
+				this->Terminal_Set_Cursor(11, 4); Serial.print(F("SD Card Connection")); this->Terminal_Dot(11, 22, 12); this->Terminal_Bracket(11, 34, 4);
+
+			}
+
+			// Hardware Detail Box
+			void Terminal_Hardware_Detail(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(4, 42, 12, 81, "Hardware Detail", 2, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(5, 44); Serial.print(F("Serial ID")); this->Terminal_Dot(5, 53, 9); this->Terminal_Bracket(5, 62, 16);
+				this->Terminal_Set_Cursor(6, 44); Serial.print(F("Firmware Version")); this->Terminal_Dot(6, 60, 10); this->Terminal_Bracket(6, 70, 8);
+				this->Terminal_Set_Cursor(7, 44); Serial.print(F("Hardware Version")); this->Terminal_Dot(7, 60, 10); this->Terminal_Bracket(7, 70, 8);
+				this->Terminal_Set_Cursor(8, 44); Serial.print(F("Module Temperature")); this->Terminal_Dot(8, 62, 9); this->Terminal_Bracket(8, 71, 7); this->Terminal_Set_Cursor(8, 78); Serial.print(F("C"));
+				this->Terminal_Set_Cursor(9, 44); Serial.print(F("Module Humidity")); this->Terminal_Dot(9, 59, 12); this->Terminal_Bracket(9, 71, 7); this->Terminal_Set_Cursor(9, 78); Serial.print(F("%"));
+				this->Terminal_Set_Cursor(10, 44); Serial.print(F("Online Send Interval")); this->Terminal_Dot(10, 64, 7); this->Terminal_Bracket(10, 71, 7); this->Terminal_Set_Cursor(10, 76); Serial.print(F("Min"));
+				this->Terminal_Set_Cursor(11, 44); Serial.print(F("Offline Send Interval")); this->Terminal_Dot(11, 65, 6); this->Terminal_Bracket(11, 71, 7); this->Terminal_Set_Cursor(11, 76); Serial.print(F("Min"));
+
+			}
+
+			// Hardware Battery Box
+			void Terminal_Battery_Detail(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(4, 82, 12, 121, "Battery", 3, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(5, 84); Serial.print(F("Instant Voltage")); this->Terminal_Dot(5, 99, 13); this->Terminal_Bracket(5, 112, 6); this->Terminal_Set_Cursor(5, 118); Serial.print(F("V"));
+				this->Terminal_Set_Cursor(6, 84); Serial.print(F("Temperature")); this->Terminal_Dot(6, 95, 16); this->Terminal_Bracket(6, 111, 7); this->Terminal_Set_Cursor(6, 118); Serial.print(F("C"));
+				this->Terminal_Set_Cursor(7, 84); Serial.print(F("Average Current")); this->Terminal_Dot(7, 99, 10); this->Terminal_Bracket(7, 109, 9); this->Terminal_Set_Cursor(7, 117); Serial.print(F("mA"));
+				this->Terminal_Set_Cursor(8, 84); Serial.print(F("State of Charge")); this->Terminal_Dot(8, 99, 12); this->Terminal_Bracket(8, 111, 7); this->Terminal_Set_Cursor(8, 118); Serial.print(F("%"));
+				this->Terminal_Set_Cursor(9, 84); Serial.print(F("Full Battery Capacity")); this->Terminal_Dot(9, 105, 6); this->Terminal_Bracket(9, 111, 7); this->Terminal_Set_Cursor(9, 117); Serial.print(F("mA"));
+				this->Terminal_Set_Cursor(10, 84); Serial.print(F("Instant Battery Capacity")); this->Terminal_Dot(10, 108, 3); this->Terminal_Bracket(10, 111, 7); this->Terminal_Set_Cursor(10, 117); Serial.print(F("mA"));
+				this->Terminal_Set_Cursor(11, 84); Serial.print(F("Charge State")); this->Terminal_Dot(11, 96, 10); this->Terminal_Bracket(11, 106, 12);
+
+			}
+
+			// GSM Initialize Detail
+			void Terminal_GSM_Init_Detail(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(16, 2, 23, 41, "GSM Initialize", 4, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(17, 4); Serial.print(F("Manufacturer")); this->Terminal_Dot(17, 16, 21); this->Terminal_Bracket(17, 37, 1);
+				this->Terminal_Set_Cursor(18, 4); Serial.print(F("Model")); this->Terminal_Dot(18, 9, 28); this->Terminal_Bracket(18, 37, 1);
+				this->Terminal_Set_Cursor(19, 4); Serial.print(F("Firmware")); this->Terminal_Dot(19, 12, 17); this->Terminal_Bracket(19, 29, 9);
+				this->Terminal_Set_Cursor(20, 4); Serial.print(F("IMEI")); this->Terminal_Dot(20, 8, 15); this->Terminal_Bracket(20, 23, 15);
+				this->Terminal_Set_Cursor(21, 4); Serial.print(F("Serial ID")); this->Terminal_Dot(21, 13, 15); this->Terminal_Bracket(21, 28, 10);
+				this->Terminal_Set_Cursor(22, 4); Serial.print(F("ICCID")); this->Terminal_Dot(22, 9, 10); this->Terminal_Bracket(22, 19, 19);
+
+			}
+
+			// GSM Connection Detail
+			void Terminal_GSM_Connection_Detail(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(16, 42, 23, 81, "GSM Connection", 5, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(17, 44); Serial.print(F("GSM Connection Time")); this->Terminal_Dot(17, 63, 11); this->Terminal_Bracket(17, 74, 4);
+				this->Terminal_Set_Cursor(18, 44); Serial.print(F("Signal Level")); this->Terminal_Dot(18, 56, 17); this->Terminal_Bracket(18, 73, 5);
+				this->Terminal_Set_Cursor(19, 44); Serial.print(F("GSM Operator")); this->Terminal_Dot(19, 56, 17); this->Terminal_Bracket(19, 73, 5);
+				this->Terminal_Set_Cursor(20, 44); Serial.print(F("IP Address")); this->Terminal_Dot(20, 54, 9); this->Terminal_Bracket(20, 63, 15);
+				this->Terminal_Set_Cursor(21, 44); Serial.print(F("LAC")); this->Terminal_Dot(21, 47, 27); this->Terminal_Bracket(21, 74, 4);
+				this->Terminal_Set_Cursor(22, 44); Serial.print(F("Cell ID")); this->Terminal_Dot(22, 51, 23); this->Terminal_Bracket(22, 74, 4);
+
+			}
+
+
+
+
+			
 			void Terminal_PowerStat(void) {
 
 				// Start Console
 				this->Terminal_Start();
 
 				// Draw Main Box
-				this->Terminal_Box(1, 1, 41, 120, "", 0, true,true);
+				this->Terminal_Box(1, 1, 41, 122, "", 0, true,true);
+				this->Terminal_Text(2, 3, Terminal_WHITE, "Up Time");
+				this->Terminal_Text(2, 55, Terminal_WHITE, "PowerStat V4");
 
-				// Draw Hardware Diagnostic Box
-				this->Terminal_Box(4, 2, 12, 39, "Hardware Diagnostic", 1, false, false);
+				// Hardware Diagnostic
+				this->Terminal_Hardware_Diagnostic();
 
-				// Draw Device Detail Box
-				this->Terminal_Box(4, 40, 12, 79, "Device Detail", 2, false, false);
+				// Hardware Detail
+				this->Terminal_Hardware_Detail();
 
-				// Draw Battery Detail Box
-				this->Terminal_Box(4, 80, 12, 119, "Battery", 3, false, false);
+				// Battery Detail
+				this->Terminal_Battery_Detail();
 
 				// Draw GSM Terminal Box
-				this->Terminal_Box(13, 2, 15, 79, "", 0, false, false);
+				this->Terminal_Box(13, 2, 15, 41, "", 0, false, false);
 
-				// Draw Interval Box
-				this->Terminal_Box(13, 80, 15, 119, "", 0, false, false);
+				// Draw Info Box
+				this->Terminal_Box(13, 42, 15, 81, "", 0, false, false);
 
-				// Draw GSM Detail Box
-				this->Terminal_Box(16, 2, 23, 39, "GSM Detail", 4, false, false);
+				// Draw State Box
+				this->Terminal_Box(13, 82, 15, 121, "", 0, false, false);
+				this->Terminal_Text(14, 84, Terminal_WHITE, "Device"); this->Terminal_Dot(14, 90, 6); this->Terminal_Bracket(14, 96, 3);
+				this->Terminal_Text(14, 104, Terminal_WHITE, "Fault"); this->Terminal_Dot(14, 109, 6); this->Terminal_Bracket(14, 115, 3);
+				this->Terminal_Text(13, 102, Terminal_WHITE, "┬");
+				this->Terminal_Text(14, 102, Terminal_WHITE, "│");
+				this->Terminal_Text(15, 102, Terminal_WHITE, "┴");
+
+				// Draw GSM Initialize Box
+				this->Terminal_GSM_Init_Detail();
 
 				// Draw GSM Connection Box
-				this->Terminal_Box(16, 40, 23, 79, "GSM Connection", 5, false, false);
+				this->Terminal_GSM_Connection_Detail();
+
+
+
+
+
+
+
+
 
 				// Draw FOTA Detail Box
-				this->Terminal_Box(16, 80, 23, 119, "FOTA", 6, false, false);
+				this->Terminal_Box(16, 82, 23, 121, "FOTA", 6, false, false);
 
 				// Draw JSON Box
 				this->Terminal_Box(24, 2, 32, 79, "JSON", 0, false, false);
 
 				// Draw Pressure Box
 				this->Terminal_Box(24, 80, 32, 119, "Pressure", 7, false, false);
-
-				// Draw GSM Detail Box
-				this->Terminal_Box(16, 2, 23, 39, "GSM Detail", 4, false, false);
 
 				// Draw Voltage Box
 				this->Terminal_Box(33, 2, 38, 39, "Voltage", 0, false, false);
@@ -386,74 +624,6 @@
 				delay(5);
 
 			}
-
-			// Draw Box Function.
-			void Terminal_Box(uint8_t _X1, uint8_t _Y1, uint8_t _X2, uint8_t _Y2, String _Text, uint8_t _Number, bool _Header, bool _Footer) {
-
-				// Set Text Color (White)
-				Serial.print(F("\e[37m"));
-
-				// Set Text Format
-				Serial.print(F("\e[2m"));
-
-				// Print Corners
-				Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("┌"));
-				Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("└"));
-				Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┐"));
-				Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┘"));
-
-				// Print Lines
-				for (uint8_t i = _X1 + 1; i <= _X2 - 1; i++) {
-					Serial.print(F("\e[")); Serial.print(i); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("│"));
-					Serial.print(F("\e[")); Serial.print(i); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("│"));
-				}
-				for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
-					Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
-					Serial.print(F("\e[")); Serial.print(_X2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
-				}
-
-				// Print Header
-				Serial.print(F("\e[33m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y1 + 2); Serial.print(F("H")); Serial.print(_Text);
-
-				// Print Header Number
-				if (_Number != 0) {
-					Serial.print(F("\e[37m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2 - 4); Serial.print(F("H")); Serial.print(F("[ ]"));
-					Serial.print(F("\e[33m")); Serial.print(F("\e[")); Serial.print(_X1); Serial.print(F(";")); Serial.print(_Y2 - 3); Serial.print(F("H")); Serial.print(_Number);
-				}
-
-				// Set Text Color (White)
-				Serial.print(F("\e[37m"));
-
-				// Draw Header
-				if (_Header) {
-
-					// Print Corners
-					Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("├"));
-					Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┤"));
-
-					// Print Lines
-					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
-						Serial.print(F("\e[")); Serial.print(_X1 + 2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
-					}
-
-				}
-				
-				// Draw Footer			
-				if (_Footer) {
-
-					// Print Corners
-					Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(_Y1); Serial.print(F("H")); Serial.print(F("├"));
-					Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(_Y2); Serial.print(F("H")); Serial.print(F("┤"));
-
-					// Print Lines
-					for (uint8_t i = _Y1 + 1; i <= _Y2 - 1; i++) {
-						Serial.print(F("\e[")); Serial.print(_X2 - 2); Serial.print(F(";")); Serial.print(i); Serial.print(F("H")); Serial.print(F("─"));
-					}
-
-				}
-				
-			}
-
 
 		// Public Functions
 		public:
@@ -534,6 +704,33 @@
 				this->Variables.Interval.Online = this->Get_EEPROM(EEPROM_Online_Interval);
 				this->Variables.Interval.Offline = this->Get_EEPROM(EEPROM_Offline_Interval);
 				this->Variables.Interval.Alarm = this->Get_EEPROM(EEPROM_Alarm_Duration);
+
+				// Detect Multiplexer
+				I2C_Functions I2C_Multiplexer(__I2C_Addr_TCA9548__);
+				if (I2C_Multiplexer.Detect()) {this->Terminal_Text(5,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(5,35, Terminal_RED, F("FAIL"));}
+
+				// Detect RTC
+				I2C_Functions I2C_RTC(__I2C_Addr_RV3028C7__, true, 1);
+				if (I2C_RTC.Detect()) {this->Terminal_Text(6,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(6,35, Terminal_RED, F("FAIL"));}
+
+				// Detect Serial
+				I2C_Functions I2C_DS28C(__I2C_Addr_DS28C__, true, 2);
+				if (I2C_DS28C.Detect()) {this->Terminal_Text(7,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(7,35, Terminal_RED, F("FAIL"));}
+
+				// Detect HDC2010
+				I2C_Functions I2C_HDC2010(__I2C_Addr_HDC2010__, true, 3);
+				if (I2C_HDC2010.Detect()) {this->Terminal_Text(8,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(8,35, Terminal_RED, F("FAIL"));}
+
+				// Detect MAX17055
+				I2C_Functions I2C_MAX17055(__I2C_Addr_MAX17055__, true, 4);
+				if (I2C_MAX17055.Detect()) {this->Terminal_Text(9,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(9,35, Terminal_RED, F("FAIL"));}
+
+				// Detect BQ24298
+				I2C_Functions I2C_BQ24298(__I2C_Addr_BQ24298__, true, 5);
+				if (I2C_BQ24298.Detect()) {this->Terminal_Text(10,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(10,35, Terminal_RED, F("FAIL"));}
+
+				// Detect SD
+				if (this->Variables.Sense.SD_Card) {this->Terminal_Text(11,35, Terminal_GREEN, F(" OK "));} else {this->Terminal_Text(11,35, Terminal_RED, F("FAIL"));}
 
 			}
 
@@ -810,6 +1007,20 @@
 					}
 					
 				#endif
+
+			}
+
+			// Print Text to Specified Position and Color.
+			void Terminal_Text(const uint8_t _X, const uint8_t _Y, const uint8_t _Color, const String _Value) {
+
+				// Set Text Cursor Position
+				this->Terminal_Set_Cursor(_X, _Y);
+
+				// Set Text Color
+				this->Terminal_Text_Color(_Color);
+
+				// Print Text			
+				Serial.print(String(_Value));
 
 			}
 

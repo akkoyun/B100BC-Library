@@ -36,4 +36,23 @@
 	#define EEPROM_Current_Ratio		0x28
 	#define EEPROM_Fault_Control		0x2A
 
+	#define Terminal_BLACK				(uint8_t)30
+	#define Terminal_RED				(uint8_t)31
+	#define Terminal_GREEN				(uint8_t)32
+	#define Terminal_YELLOW				(uint8_t)33
+	#define Terminal_BLUE				(uint8_t)34
+	#define Terminal_MAGENTA			(uint8_t)35
+	#define Terminal_CYAN				(uint8_t)36
+	#define Terminal_WHITE				(uint8_t)37
+	#define Terminal_GRAY				(uint8_t)90
+
+	// Text Format Definitions
+	#define Terminal_RST				(uint8_t)0
+	#define Terminal_BRIGHT				(uint8_t)1
+	#define Terminal_DIM				(uint8_t)2
+	#define Terminal_UNDERSCORE			(uint8_t)4
+	#define Terminal_BLINK				(uint8_t)5
+	#define Terminal_REVERSE			(uint8_t)7
+	#define Terminal_HIDDEN				(uint8_t)8
+
 #endif
