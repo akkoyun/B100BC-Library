@@ -537,10 +537,40 @@
 
 			}
 
+			// GSM FOTA Detail
+			void Terminal_FOTA_Detail(void) {
 
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(16, 82, 23, 121, "FOTA", 6, false, false);
 
+				// Print Texts
+				this->Terminal_Set_Cursor(17, 84); Serial.print(F("File ID")); this->Terminal_Dot(17, 91, 21); this->Terminal_Bracket(17, 112, 6);
+				this->Terminal_Set_Cursor(18, 84); Serial.print(F("Download Status")); this->Terminal_Dot(18, 99, 15); this->Terminal_Bracket(18, 114, 4);
+				this->Terminal_Set_Cursor(19, 84); Serial.print(F("FTP File Size")); this->Terminal_Dot(19, 97, 14); this->Terminal_Bracket(19, 111, 7);
+				this->Terminal_Set_Cursor(20, 84); Serial.print(F("SD File Size")); this->Terminal_Dot(20, 96, 15); this->Terminal_Bracket(20, 111, 7);
+				this->Terminal_Set_Cursor(21, 84); Serial.print(F("Download Percent")); this->Terminal_Dot(21, 100, 13); this->Terminal_Bracket(21, 113, 5); this->Terminal_Set_Cursor(21, 118); Serial.print(F("%"));
+				this->Terminal_Set_Cursor(22, 84); Serial.print(F("Download Time")); this->Terminal_Dot(22, 97, 13); this->Terminal_Bracket(22, 110, 8); this->Terminal_Set_Cursor(22, 116); Serial.print(F("Sec"));
 
-			
+			}
+
+			// GSM Pressure Detail
+			void Terminal_Pressure_Detail(void) {
+
+				// Draw Hardware Diagnostic
+				this->Terminal_Box(24, 82, 32, 121, "Pressure", 7, false, false);
+
+				// Print Texts
+				this->Terminal_Set_Cursor(25, 84); Serial.print(F("Instant")); this->Terminal_Dot(25, 91, 18); this->Terminal_Bracket(25, 109, 9); this->Terminal_Set_Cursor(25, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(26, 84); Serial.print(F("Min")); this->Terminal_Dot(26, 87, 22); this->Terminal_Bracket(26, 109, 9); this->Terminal_Set_Cursor(26, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(27, 84); Serial.print(F("Max")); this->Terminal_Dot(27, 87, 22); this->Terminal_Bracket(27, 109, 9); this->Terminal_Set_Cursor(27, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(28, 84); Serial.print(F("Avarage")); this->Terminal_Dot(28, 91, 18); this->Terminal_Bracket(28, 109, 9); this->Terminal_Set_Cursor(28, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(29, 84); Serial.print(F("Deviation")); this->Terminal_Dot(29, 93, 16); this->Terminal_Bracket(29, 109, 9); this->Terminal_Set_Cursor(29, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(30, 84); Serial.print(F("Slope")); this->Terminal_Dot(30, 89, 20); this->Terminal_Bracket(30, 109, 9); this->Terminal_Set_Cursor(30, 116); Serial.print(F("Bar"));
+				this->Terminal_Set_Cursor(31, 84); Serial.print(F("Data Count")); this->Terminal_Dot(31, 94, 21); this->Terminal_Bracket(31, 115, 3);
+
+			}
+
+			// PowerStat Terminal 
 			void Terminal_PowerStat(void) {
 
 				// Start Console
@@ -580,22 +610,20 @@
 				// Draw GSM Connection Box
 				this->Terminal_GSM_Connection_Detail();
 
+				// FOTA Box
+				this->Terminal_FOTA_Detail();
+
+				// Pressure Box
+				this->Terminal_Pressure_Detail();
 
 
 
 
 
 
-
-
-				// Draw FOTA Detail Box
-				this->Terminal_Box(16, 82, 23, 121, "FOTA", 6, false, false);
 
 				// Draw JSON Box
 				this->Terminal_Box(24, 2, 32, 79, "JSON", 0, false, false);
-
-				// Draw Pressure Box
-				this->Terminal_Box(24, 80, 32, 119, "Pressure", 7, false, false);
 
 				// Draw Voltage Box
 				this->Terminal_Box(33, 2, 38, 39, "Voltage", 0, false, false);
